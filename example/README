@@ -1,0 +1,10 @@
+All commands must happen in this directory.
+# Run docker-compose
+docker-compose up
+# Splunk access
+Login to http://localhost:1800 with admin/changeme
+# Access to Flume
+* Create a new flume input
+* Enter client ID, client secret, username and password.
+# Search
+* The data is the water flow in the last minute, in gallons.
