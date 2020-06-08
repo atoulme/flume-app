@@ -107,21 +107,22 @@ def getDevices(config):
 
     if config["verbose"]: print("Executed device search")
 
+    config["device_id"] = []
     if dataJSON["http_code"] == 200:
         for bridge in dataJSON["data"]:
             if config["verbose"]:
                 print("JSON Data from device")
                 print(dataJSON["data"])
             if bridge["type"] == 2:
-                config["device_id"] = bridge["id"]
+                config["device_id"].append(bridge["id"])
 
 
-def getWaterFlowLastMinute(config):
+def getWaterFlowLastMinute(config, deviceId):
     payload = '{"queries":[{"request_id":"perminute","bucket":"MIN","since_datetime":"' + previousminute() + '","until_datetime":"' + currentminute() + '","group_multiplier":"1","operation":"SUM","sort_direction":"ASC","units":"GALLONS"}]}'
     #print(payload)
     headers = buildRequestHeader(config);
     headers["content-type"] = "application/json"
-    resp = requests.request("POST", "https://api.flumetech.com/users/" + str(config["user_id"])  + "/devices/" + str(config["device_id"])  + "/query", data=payload, headers=headers)
+    resp = requests.request("POST", "https://api.flumetech.com/users/" + str(config["user_id"])  + "/devices/" + str(deviceId)  + "/query", data=payload, headers=headers)
     data = json.loads(resp.text)
     #print(data)
     if data["http_code"]==200:
@@ -188,7 +189,9 @@ def run_script():
     obtainCredentials(config)
     getUserID(config)
     getDevices(config)
-    print(currentminute() + ": " + str(getWaterFlowLastMinute(config)))
+    for device in config["device_id"]:
+        print("{\"time\":\"" + currentminute() + "\",\"device\":\"" + str(device) + "\",\"value\":\"" + str(getWaterFlowLastMinute(config, device)) + "\"}")
+
 
 
 # Script must implement these args: scheme, validate-arguments
